@@ -1,0 +1,175 @@
+This query returns name, surname, department number and position for all employees sorted by firs name. 
+
+ select
+    *
+    from employees e join jobs j on e.job_id = j.job_id
+    order by first_name
+
+\
+
+This query returns employees working in Seattle and Oxford sorted by the city name.
+
+select 
+    *
+    from employees e join departments d on e.department_id = d.department_id
+    join locations l using(location_id)
+    where city = 'Seattle' or city = 'Oxford'
+    order by city 
+
+\
+
+This query returns name and title of employees employed in Europe.
+
+ select 
+ first_name,
+ last_name,
+ job_title
+ from
+ employees e join jobs j using(job_id)
+ join departments d using(department_id)
+ join locations using (location_id)
+ join countries using(country_id)
+ join regions using (region_id)
+where region_name = 'Europe'
+
+\
+
+This query returns employees whose pay falls within the pay range for Public Accountant and programmer sorted by last name.
+
+
+select
+    *
+    from employees e join jobs j on e.salary between j.min_salary and j.max_salary
+    where job_title = 'Programmer' or job_title = 'Public Accountant'
+order by last_name
+
+\
+
+This query returns the names and place of work of employees not working in San Francisco who earn less than $10,000 and theirs
+actual earnings correspond to the salary ranges provided for SH_CLERK.
+
+select 
+first_name,
+last_name,
+salary,
+city
+from employees e join departments d on e.department_id = d.department_id
+                join locations l on l.location_id = d.location_id
+                join jobs j on e.salary between j.min_salary and j.max_salary
+where salary <10000 and j.job_id = 'SH_CLERK' and city not like '%San Francisco'
+
+\
+
+This query returns names, salaries with commission percentage, salary categories and job identifiers 
+other than ST_MAN, SA_REP and FI_MGR sorted by salary descending.
+
+select 
+first_name,
+last_name,
+salary + (salary * nvl(commission_pct,0)) as salary,
+min_salary,
+max_salary,
+job_id
+from employees e join jobs j using(job_id)
+where job_id not like 'ST_MAN' and job_id not like 'SA_REP' and job_id not like 'FI_MGR'
+order by salary desc
+
+\
+
+This query returns the number of employees who do not work in the state province starting with letter T. 
+
+select
+count(*) counter
+from employees e join departments d using(department_id)
+join locations l using(location_id)
+where state_province not like 'T%'
+
+\
+
+This query returns information about employees who are employed in the position Accountant and Puchasing Clerk 
+with an annual income in excess of £37,200. Annual the income is twelve times the base salary plus commission.
+
+select 
+    e.*, 
+    (salary + (salary * nvl(commission_pct,0))) * 12 pensja_roczna
+from employees e 
+where (salary + (salary * nvl(commission_pct,0))) * 12 > 37200 and (e.job_id = 'FI_ACCOUNT' OR e.job_id = 'PU_CLERK')
+
+\
+
+This query returns the names of employees along with the names of their bosses.
+
+select 
+    e.first_name, 
+    e.last_name,
+    f.manager_id,
+    e.employee_id,
+    f.first_name as boss_fist_name,
+    f.last_name as boss_last_name
+from employees e join employees f on e.employee_id=f.manager_id
+order by f.manager_id
+
+\
+
+This query returns number of employees and their average basic pay rounded to two decimal places for each department name.
+
+select 
+department_name,
+count(*),
+round(avg(salary),2)
+from employees e join departments d using(department_id)
+group by department_name
+order by round(avg(salary),2) desc
+
+\
+
+This query returns the number of subordinates for each manager (no NULL) sorted in descending order.
+
+select 
+f.manager_id,
+count(*) counter
+from employees e right join employees f on e.employee_id=f.manager_id
+where f.manager_id is not null
+group by f.manager_id
+order by counter desc
+
+\
+
+This query returns names and dates of employment of employees and their managers, employed no
+later than 500 days after their managers.
+
+select e.first_name as first_name, 
+e.last_name as last_name, 
+e.hire_date as hire_date,
+f.first_name as boss_first_name, 
+f.last_name as boss_last_name,
+f.hire_date as boss_hire_date,
+trunc(f.hire_date-e.hire_date) as diff_days
+from employees e join employees f on e.employee_id=f.manager_id
+where trunc(f.hire_date-e.hire_date)<500
+order by diff_days
+
+\
+
+This query returns, how much are salaries for employees in individual departments per month? Results are sorted do that IT is first, Finance is second and the rest remain in alphabetic order.
+
+select
+department_name,
+sum(salary) as result
+from departments d join employees e on d.department_id=e.department_id
+group by d.department_name
+order by case when department_name = 'IT' then 1
+                when department_name = 'Finance' then 2
+                else 3
+                end
+
+
+
+
+
+
+
+
+
+
+

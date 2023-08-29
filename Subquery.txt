@@ -1,0 +1,131 @@
+This query returns names and job titles of employees working in the same department as an employee named Hunold.
+
+
+select
+    last_name,
+    (select job_title from jobs where job_id = e.job_id) jt
+    from employees e
+where department_id = (
+                select
+                    department_id from employees
+                where last_name = 'Hunold')
+
+\
+
+This query returns data on the longest-employed employee in the position FI_ACCOUNT.
+
+
+select
+    *
+    from employees
+where
+    (job_id, hire_date) = (select job_id, min(hire_date) from employees 
+                                where job_id = 'FI_ACCOUNT'
+                                group by job_id)
+
+\
+
+This query returns longest-serving employees in each department.
+
+select
+*
+from employees e
+where (department_id, hire_date) in (select department_id, min(hire_date) from employees group by department_id)
+order by hire_date
+
+\
+
+This query returns names of positions where no one from the MARKETING department was hired.
+
+
+select 
+*
+from jobs 
+where job_id in (select job_id from jobs where job_id not like 'MK_%')
+
+\
+
+This query returns information about employees earning more than the average salary from their
+department, sorted in descending order by surname.
+
+select 
+first_name,
+last_name,
+salary,
+department_id
+from employees e
+where salary > (select avg(salary) from employees
+                where department_id = e.department_id)
+
+\
+
+This query returns names and salaries of employees who earn at least 75%
+their managers' salary.
+
+select
+first_name,
+last_name,
+salary
+from employees e
+where salary >= (0.75* (select salary from employees f where f.employee_id = e.manager_id))
+
+\
+
+This query returns names of programmers who do not have a manager who is from the team 10.
+
+select
+first_name,
+last_name
+job_id
+from employees e
+where (job_id, manager_id) in (select job_id, manager_id from employees f 
+					where (job_id, department_id) in (select job_id, department_id from employees 
+					where job_id = 'IT_PROG' and department_id != 10))
+\
+
+This query returns employee information not employed in any department.
+
+select
+    first_name,
+    last_name
+    from employees e
+where
+    not exists (select * from departments
+                where department_id = e.department_id)
+
+\
+
+This query returns the department_id that pays its employees the most money monthly.
+
+select 
+department_id 
+from employees
+group by department_id
+having sum(salary) >= all (select sum(salary) from employees group by department_id)
+
+\
+
+This query returns employees whose salary is outside the wage range of the minimum wage for a Sales Representative 
+to the maximum wage for Sales Representatives.
+
+select
+first_name,
+last_name,
+department_id
+from employees
+where salary not between (select min_salary from jobs
+                            where job_title = 'Sales Representative') 
+                            and (select max_salary from jobs 
+                                    where job_title = 'Sales Representative')
+\
+
+This query returns job titles of employees from Germany and Canada.  
+
+select
+    job_title
+    from jobs
+where job_id in (select job_id from employees
+                       where department_id in (select department_id from departments
+                                                     where location_id in (select location_id from locations
+                                                                                 where country_id in (select country_id from countries
+                                                                                                            where country_name in 																					('Canada', 'Germany')))))

@@ -1,0 +1,64 @@
+This query returns total payroll for each department with a summary.
+
+select
+department_name,
+sum(salary) as result
+from departments d join employees e on d.department_id=e.department_id
+group by rollup(department_name)
+
+\
+
+This query returns maximum wages for each department and the highest wage from them.
+
+select
+case when GROUPING(department_id)=1 then 'Max company salary' else
+to_char(department_id) end as dept_id,
+max(salary) as MAX 
+from employees 
+group by 
+rollup(department_id)
+        
+\
+
+This query returns the sum of the basic salary with a summary for each department.
+
+select
+department_name,
+job_title,
+sum(salary),
+grouping_id(department_name, job_title)
+from departments d join employees e on d.department_id=e.department_id join jobs j on j.job_id=e.job_id
+group by 
+	cube(department_name, job_title)
+having
+    grouping_id(department_name, job_title)  != 3
+order by department_name desc
+
+\
+
+This query returns the average salary with summaries for each department and job_id.
+
+select
+    case when grouping_id(e.department_id, j.job_title) = 3 then 'TOGETHER' else to_char(e.department_id) end as dept_id,
+    case when grouping_id(e.department_id, j.job_title) = 3 then '-------'
+        when j.job_title IS NULL then concat('Summary ', to_char(e.department_id))
+        else j.job_title end as jobs, 
+        round(avg(salary),1) as salary
+    from employees e join jobs j on j.job_id = e.job_id
+    group by rollup(e.department_id, j.job_title)
+    having case when grouping_id(e.department_id, j.job_title) = 3 then 'TOGETHER' else to_char(e.department_id) end IS NOT NULL
+    order by e.department_id
+
+\
+
+This query returns the sum of the salaries of departments 10, 20 and 30 together with all jobs. Showing only
+those totals that are greater than 18999.
+
+SELECT department_id, job_title, sum(salary)
+FROM employees e
+JOIN jobs j ON e.job_id = j.job_id
+WHERE department_id <=30
+GROUP BY ROLLUP(department_id, job_title)
+HAVING NOT (job_title IS NULL AND sum(salary)<18999)
+ORDER BY department_id;
+

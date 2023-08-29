@@ -1,0 +1,236 @@
+----------------- Functions ------------------------
+
+This query returns code consisting of the first two letters of job_id
+and employee_id
+
+select
+    job_id,
+    employee_id,
+    concat(substr(job_id,1,2), employee_id) code
+from employees
+
+\
+
+This query returns last names with the letters 'l', 'm', 'k' changed tp 'x'.
+
+SELECT
+    last_name,
+    TRANSLATE(last_name, 'lmk', 'XXX') char_war
+FROM
+    employees
+
+\
+
+This query returns 15% salary increase for each employee.
+
+select
+    last_name,
+    salary as before,
+    ( salary + (salary*0.15)+(salary * nvl(commission_pct,0))) as more_money
+from employees
+
+\
+
+This query returns how many days each employee is employed.
+
+SELECT
+    last_name,
+    to_date('21/01/10') - hire_date number_of_days,
+    case 
+    when (to_date('21/01/10') - hire_date) > 10000 then 'Working more that 10000 days'
+    else '----' end caser
+from employees
+
+\
+
+This query returns a result of the algebraic expression.
+
+SELECT
+    round(power(mod(134,8) * sqrt (81) /244,4)+0.0097,4) operation
+    from dual
+
+\
+
+This query returns a new column that will hold the first 8 characters of last_name. 
+If last name is shorter than 8 characters 'X' is added at the end.
+
+
+select
+     last_name,
+     rpad (Last_name,8, 'X')
+     from employees
+
+\
+
+This query returns last name where the last three letters are in reverse order. 
+
+select
+    last_name, 
+    concat(substr(last_name,1,length(last_name)-3), reverse(substr(last_name,-3,3))) code
+    from employees
+
+\
+
+This query returns bonus, assuming that only employees who earn 12,000 or 14,000 receive it.
+
+select
+    salary,
+    decode(salary, 
+            12000, 'bonus 12',
+            14000, 'bonus 14',
+            '----') bonus
+from employees
+order by
+    bonus desc
+
+\
+
+This query returns employees who have more than one letter "e".
+
+select
+last_name,
+INSTR(last_name,'e', 1, 2)
+from employees
+where (INSTR(last_name,'e', 1, 2)) > 0
+
+\
+
+This query returns workers from May, June and July who in the second part of the phone number
+have the number 123.
+
+select 
+    last_name,
+    phone_number,
+    hire_date
+    from employees
+where (hire_date like '%/06/%' or hire_date like '%/05/%' or hire_date like '%/07/%') and phone_number like '%.123.%'
+
+------------- Group by --------------------
+
+This query returns lowest and highest salary in the company and information about the difference between
+best and worst paid workers. 
+
+select
+    min(salary) min,
+    max(salary) max,
+    (max(salary)-min(salary)) as dif
+    from employees
+
+\
+
+This query returns average salary for all job_ids sorted by average wage in descending order. 
+
+select 
+    job_id,
+    avg(salary) average
+    from employees
+    group by job_id
+    order by average desc
+
+\
+
+This query returns the number of IT_PROG employees in the company.
+
+select 
+    count(job_id)
+    from employees
+    where job_id = 'IT_PROG'
+
+\
+
+This query returns total monthly salary for each department without NULL.
+
+select
+    department_id,
+    sum(salary)
+    from employees
+    where department_id is not null
+    group by department_id
+
+\
+
+This query returns the salary of the lowest earning subordinate for each manager.
+
+select
+    manager_id,
+    min(salary)
+    from employees
+    group by manager_id
+
+\
+
+This query returns employees with the letters O and R in their surnames. 
+
+select 
+    count(last_name)
+    from employees
+    where (last_name like '%o%' or last_name like 'O%' or last_name like '%o') and (last_name like '%r%' or last_name like 'R%' or last_name like '%r')
+
+\
+
+This query returns a department that will earn more than 50,000 (salary) per month when it receives
+10 times a 10% increase. Sort the results by departments. 
+
+select 
+    department_id,
+    floor (sum(salary)*power((1+(0.1/10)),10)) amount
+    from employees
+    having(floor (sum(salary)*power((1+(0.1/10)),10))) > 50000
+    group by department_id
+
+\
+
+This query returns maximum and minimum wages for employees before the year 2000 and having a manager with ID 100 or 130. 
+
+select 
+    max(salary),
+    min(salary)
+    from employees
+    where(extract(year from hire_Date) > 00) and (manager_id = 100 or manager_id = 130)
+
+\
+    
+This query returns team numbers with the number of employees in each department sorted by departments descending. 
+
+select
+    department_id,
+    count(*)
+    from employees
+    group by department_id
+    order by department_id desc
+
+\
+
+This query returns average and maximum basic salary IT_PROG and SA_REP in individual teams. Results are rounded to integers and sorted by department_id and job_id.
+
+select 
+	round(avg(salary),0) avg,
+	max(salary) max,
+	job_id
+	from employees
+	group by department_id, job_id
+	having job_id='SA_REP' or job_id='IT_PROG'
+
+\
+
+This query returns number of employees employed each year and month sorted by year descending. 
+
+select
+	extract(year from hire_date) as year,
+	extract(month from hire_date) as month,
+	count(*) counter
+	from employees
+	group by extract(year from hire_date), extract(month from hire_date)
+	order by year desc
+
+\
+
+This query returns the number of letters in the combination of FIRST and LAST NAME and displays the number of names with the given number of letters.
+
+select
+    length(first_name)+length(last_name) number_of_char,
+    count(*)
+    from employees
+    group by (length(first_name)+length(last_name))
+    order by number_of_char desc
+

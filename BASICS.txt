@@ -1,0 +1,170 @@
+This query returns names and yearly income of the employers.
+
+	select
+    	last_name,
+    	( salary + (salary * nvl(commission_pct,0))) * 12 yearly_salary
+    	from employees
+/
+
+This query returns a list of "job_id" without duplicates. 
+
+select 
+    distinct job_id 
+    from employees
+    where department_id not like 20
+    
+/
+
+This query returns all information of AC_ACCOUNT and FI_ACCOUNT employees sorted by date of employment (descending).
+
+select 
+    *
+    from employees
+    where job_id = 'AC_ACCOUNT'
+    or job_id = 'FI_ACCOUNT'
+    order by hire_date desc
+
+/
+
+This query returns employee_id, last_name and job_id from departments 30,40 in ascending order earnings.
+
+select 
+    employee_id,
+    last_name,
+    job_id
+    from employees
+where department_id = 30
+    or department_id = 40
+order by salary
+
+/ 
+
+This query returns representative and basic wages of those whose basic wages are not in the range
+from 8000 to 15000.
+
+SELECT
+    last_name
+    salary
+    from employees
+    where salary not between 8000 and 15000
+/
+
+This query returns name, job_id and department number of those whose last name ends with
+"an".
+
+ select 
+    last_name,
+    job_id,
+    department_id
+    from employees
+where last_name like '%an' 
+
+/
+
+This query returns the name and base wage of those who earn over 9999 and have a boss.
+
+select 
+    last_name
+    salary
+    from employees
+    where salary >9999 
+    and manager_id is not null
+
+/
+
+This query returns names, titles and hourly rates of those employees who do not work as AD_VP,
+PU_CLERK and SA_MAN and who earn between 5000 and 20000. Results are ranked according to the 
+hourly rates of employees (assuming a 20-day work month and an 8-hour daywork).
+
+select 
+    last_name,
+    job_id,salary/160 per_hour
+from employees
+where
+(job_id!='AD_VP' or job_id!='PU_CLERK' or job_id!='SA_MAN')
+and salary not between 5000 and 20000
+order by per_hour
+
+/
+
+This query returns all information about employees with an "a" at the end of their name who have extra pay
+(commission_pct).
+
+select
+    *
+    from employees
+    where commission_pct is not null
+    and first_name like '%a'
+    order by 4
+
+/
+
+This query returns names and surnames of all employees whose boss is an employee with ID 120.
+
+select
+    first_name,
+    last_name
+    from employees
+    where manager_id = 120
+
+/
+
+This query returns names, surnames monthly salary and monthly savings of employees 
+who will pay off the apartment ($ 200,000) in 5 years, being able to put aside 
+only a quarter of their full monthly salary.
+
+select 
+    first_name, 
+    last_name,
+    ( salary + (salary * nvl(commission_pct,0))) salary,
+    salary*0.25 monthly_savings,
+    salary*0.25*60 repayment
+    from employees
+    order by repayment
+
+/ 
+
+This query returns jobs available for people earning $10,000.
+
+select 
+    job_id,
+    job_title,
+    min_salary
+    max_salary
+    from jobs
+    where 10000 between min_salary and max_salary
+
+/
+
+This query returns name and surname of employees with the letter 'O' in the second position in the email.
+
+select
+    first_name,
+    last_name,
+    email
+    from employees
+    where email like '_O%'
+
+/
+
+This query returns employees whose boss is manager_id with the number 149 along with the employee's department number.
+
+select 
+    *
+    from employees
+    where manager_id = 149
+    and department_id is not null
+
+/
+
+This query returns return full salary with extra pay for employees from team 50 and 80 
+who do not work as ST_MAN and whose last name ends in "ry", "le" or "ll".
+
+select 
+    *
+    from employees
+    where (department_id = 50 or department_id = 80)
+    and job_id != 'ST_MAN'
+    and (last_name like '%ry' or last_name like '%le' or last_name like '%ll')
+
+

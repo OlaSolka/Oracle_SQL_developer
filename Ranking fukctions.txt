@@ -1,0 +1,132 @@
+This is a query that for each employee will show their place of employment and the ranking of employees in terms of salary. 
+
+SELECT
+
+first_name,
+last_name,
+street_address,
+salary,
+rank() over (order by salary desc) rank
+FROM
+employees e join departments d on e.department_id=d.department_id join locations l on d.location_id=l.location_id
+
+\
+
+This is a query that for each employee will show their place of employment and the ranking of employees in terms of salary + dense raniking. 
+
+SELECT
+
+first_name,
+last_name,
+street_address,
+salary,
+rank() over (order by salary desc) rank,
+dense_rank() over (order by salary desc) dense_rank
+FROM
+employees e join departments d on e.department_id=d.department_id join locations l on d.location_id=l.location_id
+
+\
+
+This is a query that for each employee will show their place of employment and the ranking of employees in terms of salary in the descending order. Showing only first 5 rows of the result (5 highest salaries).
+
+SELECT
+
+first_name,
+last_name,
+street_address,
+salary,
+rank() over (order by salary desc) rank,
+dense_rank() over (order by salary desc) dense_rank
+FROM
+employees e join departments d on e.department_id=d.department_id join locations l on d.location_id=l.location_id
+fetch first 5 rows only
+
+\
+
+This is a query that for each employee will show their place of employment and the ranking of employees in terms of salary in the ascending order. Showing only first 5 rows of the result (5 lowest salaries).
+ 
+
+SELECT
+
+first_name,
+last_name,
+street_address,
+salary,
+rank() over (order by salary) rank,
+dense_rank() over (order by salary) dense_rank
+FROM
+employees e join departments d on e.department_id=d.department_id join locations l on d.location_id=l.location_id
+fetch first 5 rows only
+
+\
+
+This query returns number of employees for each department and percentage ranking.
+
+select
+department_name,
+count(*)counter,
+percent_rank() over (order by department_name)*100 percent_rank
+from employees e join departments d on e.department_id=d.department_id
+group by(department_name)
+order by percent_rank 
+
+\
+
+This query returns number of employees for each department and percentage ranking. Showing first 25% of the results.
+
+select
+department_name,
+count(*)counter,
+percent_rank() over (order by department_name)*100 percent_rank
+from employees e join departments d on e.department_id=d.department_id
+group by(department_name)
+order by percent_rank desc
+fetch first 25 percent rows only
+
+\
+
+This query returns number of employees for each department, percentage ranking and percentiles. 
+
+select
+department_name,
+count(*)counter,
+percent_rank() over (order by department_name)*100 percent_rank,
+round(cume_dist() over (order by department_name), 2) percentyl
+from employees e join departments d on e.department_id=d.department_id
+group by(department_name)
+order by percent_rank 
+
+\
+
+This query returns hypothetical position in the ranking of the number of employees in the department in which
+30 employees would be employed. 
+
+SELECT
+rank(30) within group (order by department_id) hipo
+FROM employees e join departments d using (department_id)
+
+\
+
+This query returns a unique sequence number for each item in the departmental ranking. 
+
+select
+department_name,
+count(*)counter,
+rank() over (order by department_name desc) rank,
+row_number() over (order by department_name desc) row_number
+from employees e join departments d on e.department_id=d.department_id
+group by(department_name)
+order by rank
+
+\
+
+This query returns division of departments according to the position in the ranking of the number of employees.
+
+select
+department_name,
+count(*)counter,
+rank() over (order by department_name desc) rank,
+ntile(4) over (order by department_name desc) ntile
+from employees e join departments d on e.department_id=d.department_id
+group by(department_name)
+order by rank
