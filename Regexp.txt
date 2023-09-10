@@ -1,0 +1,85 @@
+1a
+
+select
+    12312312312
+    from dual
+where
+    REGEXP_LIKE('x','[^[:digit:]]', '')
+
+1b
+
+select
+ 'AG234D' 
+ from dual
+where 
+    regexp_like('AG234D','^[A-Z]{2}\d{3}[A-Z]{1}$')
+
+1c
+
+select
+'23%'
+from dual
+where 
+regexp_like('23%','^\d{2}%$')
+
+1d
+
+select
+'name.surname@example.com'
+from
+dual
+where
+regexp_like('name.surname@example.com','^\w{1,}.\w{1,}@\w{1,}.\w{2,3}$')
+
+1e
+
+
+
+2a 
+
+select
+last_name
+from employees
+where
+regexp_like(last_name, '[^Dd]i$')
+
+2b
+
+select
+last_name
+from employees
+where
+regexp_like(last_name, 'a.*a', 'i')
+
+2c
+
+select
+last_name
+from employees
+where
+regexp_like((regexp_replace(last_name, 'a','w',1,0, 'i')),'w.*w', 'i') 
+
+3.
+
+select
+first_name||' '||last_name||' '||job_id name,
+regexp_count(first_name||last_name||job_id,'.') count,
+dense_rank() over (order by regexp_count(first_name||last_name||job_id,'.') desc) rank
+from employees
+
+4.
+
+select
+regexp_replace(substr(department_id, 1, 1), '[6-9]','X')||
+regexp_replace(reverse(job_id),'_','*')||
+substr(last_name, -2) as code
+from employees
+
+5.
+
+select
+count(*)
+from employees
+where
+regexp_like(substr(first_name, 1,5),'k')or regexp_like(substr(last_name,1,5),'k')
+
